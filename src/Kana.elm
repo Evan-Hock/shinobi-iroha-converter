@@ -11,6 +11,8 @@ import Dict exposing (Dict)
 import Jank.Util
 
 
+{-| Remove dakuten from kana.
+-}
 removeDakuten : String -> String
 removeDakuten =
     String.map removeDakutenChar
@@ -41,6 +43,8 @@ removeDakutenTable =
     |> Dict.fromList
 
 
+{-| Converts katakana into hiragana.
+-}
 kataToHira : String -> String
 kataToHira =
     String.map kataToHiraChar
@@ -110,6 +114,8 @@ kataToHiraTable =
             hira
 
 
+{-| Converts small characters into normal-sized characters.
+-}
 normalizeSize : String -> String
 normalizeSize =
     String.map normalizeSizeChar

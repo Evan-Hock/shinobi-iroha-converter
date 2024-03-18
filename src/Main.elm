@@ -78,7 +78,11 @@ view model =
 conversionInput : Model -> Html Msg
 conversionInput model =
     Html.form [ Event.onSubmit Convert ]
-        [ Html.input [ Attr.value model.input, Event.onInput UpdateInput ] []
+        [ Html.input
+            [ Attr.title "Press enter or return to convert"
+            , Attr.value model.input
+            , Event.onInput UpdateInput
+            ] []
         , [ ( "Rōmaji", Romaji ), ( "Kana", Kana ) ]
             |> modeSelectorList model
                 { toMsg = SwitchMode
@@ -203,7 +207,7 @@ charToImg i char =
 
 shinobiImgUrl : String -> String
 shinobiImgUrl uniqId =
-    "/shinobi_chars/" ++ uniqId ++ ".svg"
+    "./shinobi_chars/" ++ uniqId ++ ".png"
 
 
 toRomaji : ShinobiChar -> String

@@ -22,6 +22,13 @@ type ShinobiChar
     | We | Hi | Mo | Se | Su |  N
 
 
+{-| Converts a kana string into a list of shinobi characters.
+
+Essentially does these transformations:
+* Convert katakana to hiragana
+* Remove dakuten
+* Convert small characters into normal characters
+-}
 convert : String -> List ShinobiChar
 convert =
     Kana.kataToHira
