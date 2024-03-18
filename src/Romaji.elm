@@ -39,6 +39,16 @@ syllablePairings =
     pya ぴゃ pyu ぴゅ pyo ぴょ
     mya みゃ myu みゅ myo みょ
     rya りゃ ryu りゅ ryo りょ
+
+    kka っか kki っき kku っく kke っけ kko っこ
+    ssa っさ ssi っし ssu っす sse っせ sso っそ sshi っし
+    tta った tti っち ttu っつ tte って tto っと cchi っち tchi っち
+    ppa っぱ ppi っぴ ppu っぷ ppe っぺ ppo っぽ
+
+    kkya っきゃ kkyu っきゅ kkyo っきょ
+    ssya っしゃ ssyu っしゅ ssyo っしょ ssha っしゃ sshu っしゅ ssho っしょ
+    ttya っちゃ ttyu っちゅ ttyo っちょ ccha っちゃ cchu っちゅ ccho っちょ tcha っちゃ tchu っちゅ tcho っちょ
+    ppya っぴゃ ppyu っぴゅ ppyo っぴょ
     """ 
     |> Jank.Util.groupPairs
 
@@ -73,7 +83,7 @@ parseSyllablesHelp acc =
         [ parseSyllable
             |> Parser.map ( \ syl -> Loop (syl :: acc ) )
         , Parser.end
-            |> Parser.map ( \ _ -> Done (List.reverse acc) ) 
+            |> Parser.map ( \ _ -> Done (List.reverse acc) )
         , Parser.succeed (Loop acc)
             |. Parser.chompIf ( \ _ -> True )
         ]

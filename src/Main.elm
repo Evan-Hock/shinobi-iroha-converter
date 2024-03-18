@@ -32,6 +32,7 @@ type ConversionMode
 type OutputMode
     = Text
     | Images
+    | RomajiOutput
 
 
 type Msg
@@ -83,7 +84,7 @@ conversionInput model =
                 { toMsg = SwitchMode
                 , fromModel = .mode
                 }
-        , [ ( "Unicode", Text ), ( "Images", Images ) ]
+        , [ ( "Unicode", Text ), ( "Images", Images ), ( "Rōmaji", RomajiOutput ) ]
             |> modeSelectorList model
                 { toMsg = SwitchOutputMode
                 , fromModel = .outputMode
@@ -128,9 +129,18 @@ conversionOutput mode =
 
                 Images ->
                     charToImg
+
+                RomajiOutput ->
+                    charToRomaji
+
    in
         List.indexedMap outputFunc
         >> Keyed.ul [ Attr.class "output" ]
+
+
+charToRomaji : Int -> ShinobiChar -> ( String, Html Msg )
+charToRomaji i char =
+    ( String.fromInt i, Html.li [] [ Html.text (toRomaji char) ] )
 
 
 charToDigraph : Int -> ShinobiChar -> ( String, Html Msg )
