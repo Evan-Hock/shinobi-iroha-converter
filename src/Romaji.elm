@@ -10,8 +10,8 @@ import Jank.Util
 
 syllablePairings : List ( String, String )
 syllablePairings =
-    String.words"""
-     a あ  i い u  う  e え  o お
+    String.words """
+     a あ  i い  u う  e え  o お
     ka か ki き ku く ke け ko こ
     ga が gi ぎ gu ぐ ge げ go ご
     sa さ si し su す se せ so そ shi し

@@ -24,7 +24,7 @@ removeDakutenChar char =
 
 removeDakutenTable : Dict Char Char
 removeDakutenTable =
-    String.words"""
+    String.words """
     が か ぎ き ぐ く げ け ご こ 
     ざ さ じ し ず す ぜ せ ぞ そ 
     だ た ぢ ち づ つ で て ど と 
@@ -54,7 +54,7 @@ kataToHiraChar char =
 
 kata : List Char
 kata =
-    String.words"""
+    String.words """
     ア イ ウ エ オ 
     カ キ ク ケ コ 
     ガ ギ グ ゲ ゴ 
@@ -79,7 +79,7 @@ kata =
 
 hira : List Char
 hira =
-    String.words"""
+    String.words """
     あ い う え お 
     か き く け こ 
     が ぎ ぐ げ ご 
@@ -123,7 +123,7 @@ normalizeSizeChar char =
 
 normalizeSizeTable : Dict Char Char
 normalizeSizeTable =
-    String.words"""
+    String.words """
     ぁ あ ぃ い ぅ う ぇ え ぉ お 
     っ つ ゃ や ゅ ゆ ょ よ 
     ァ ア ィ イ ゥ ウ ェ エ ォ オ 

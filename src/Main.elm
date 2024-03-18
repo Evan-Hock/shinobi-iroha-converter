@@ -6,7 +6,10 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Event
 import Html.Keyed as Keyed
-import Html.Lazy exposing (lazy)
+import Html.Lazy exposing (lazy2)
+
+
+import Jank.Util
 
 
 import Shinobi exposing (ShinobiChar(..))
@@ -17,6 +20,7 @@ type alias Model =
     { mode: ConversionMode
     , input: String
     , output: List ShinobiChar
+    , outputMode : OutputMode
     }
 
 
@@ -25,10 +29,16 @@ type ConversionMode
     | Romaji
 
 
+type OutputMode
+    = Text
+    | Images
+
+
 type Msg
     = UpdateInput String
     | Convert
     | SwitchMode ConversionMode
+    | SwitchOutputMode OutputMode
 
 
 -- MAIN
@@ -46,9 +56,10 @@ main =
 
 init : Model
 init =
-    { mode = Kana
+    { mode = Romaji
     , input = ""
     , output = []
+    , outputMode = Text
     }
 
 
@@ -59,7 +70,7 @@ view model =
     Html.main_ []
         [ Html.h1 [] [ Html.text "Shinobi Iroha" ]
         , conversionInput model
-        , lazy conversionOutput model.output
+        , lazy2 conversionOutput model.outputMode model.output
         ]
 
 
@@ -67,38 +78,108 @@ conversionInput : Model -> Html Msg
 conversionInput model =
     Html.form [ Event.onSubmit Convert ]
         [ Html.input [ Attr.value model.input, Event.onInput UpdateInput ] []
-        , [ ( "Kana", Kana ), ( "Rōmaji", Romaji ) ]
-            |> List.map (conversionModeSelector model)
-            |> Keyed.ul [ Attr.class "mode-selector" ]
+        , [ ( "Rōmaji", Romaji ), ( "Kana", Kana ) ]
+            |> modeSelectorList model
+                { toMsg = SwitchMode
+                , fromModel = .mode
+                }
+        , [ ( "Unicode", Text ), ( "Images", Images ) ]
+            |> modeSelectorList model
+                { toMsg = SwitchOutputMode
+                , fromModel = .outputMode
+                }
         ]
 
 
-conversionModeSelector : Model -> ( String, ConversionMode ) -> ( String, Html Msg )
-conversionModeSelector model ( label, mode ) =
+type alias ModeSelectorOpts mode =
+    { toMsg : mode -> Msg
+    , fromModel : Model -> mode
+    }
+        
+
+modeSelectorList : Model -> ModeSelectorOpts mode -> List ( String, mode ) -> Html Msg
+modeSelectorList model opts =
+    List.map (modeSelector model opts)
+    >> Keyed.ul [ Attr.class "mode-selector" ]
+
+
+modeSelector : Model -> ModeSelectorOpts mode -> ( String, mode ) -> ( String, Html Msg )
+modeSelector model opts ( label, mode ) =
     let
         conversionButton =
             Html.li []
                 [ Html.button
                     [ Attr.type_ "button"
-                    , Event.onClick (SwitchMode mode)
-                    , Attr.classList [ ( "selected", model.mode == mode ) ]
+                    , Event.onClick (opts.toMsg mode)
+                    , Attr.classList [ ( "selected", opts.fromModel model == mode ) ]
                     ] [ Html.text label ]
                 ]
     in
         ( label, conversionButton )
 
 
-conversionOutput : List ShinobiChar -> Html Msg
-conversionOutput =
-    List.indexedMap charToImg
-    >> Keyed.ul []
+conversionOutput : OutputMode -> List ShinobiChar -> Html Msg
+conversionOutput mode =
+    let
+        outputFunc =
+            case mode of
+                Text ->
+                    charToDigraph
+
+                Images ->
+                    charToImg
+   in
+        List.indexedMap outputFunc
+        >> Keyed.ul [ Attr.class "output" ]
+
+
+charToDigraph : Int -> ShinobiChar -> ( String, Html Msg )
+charToDigraph i char =
+    let
+        digraph =
+            Html.li [] [ Html.text (getHen char ++ getTukuri char) ]
+    in
+        ( String.fromInt i, digraph )
+
+
+getTukuri : ShinobiChar -> String
+getTukuri char =
+    let
+        in_ =
+            List.member char
+    in
+        Jank.Util.cond
+            [ ( in_ [  I, Ro, Ha, Ni, Ho, He, To ], "色" )
+            , ( in_ [ Ti, Ri, Nu, Ru, Wo, Wa, Ka ], "青" )
+            , ( in_ [ Yo, Ta, Re, So, Tu, Ne, Na ], "黄" )
+            , ( in_ [ Ra, Mu,  U, Wi, No,  O, Ku ], "赤" )
+            , ( in_ [ Ya, Ma, Ke, Hu, Ko,  E, Te ], "白" )
+            , ( in_ [  A, Sa, Ki, Yu, Me, Mi, Si ], "黒" )
+            ] "紫"
+
+
+getHen : ShinobiChar -> String
+getHen char =
+    let
+        in_ =
+            List.member char
+    in
+        Jank.Util.cond
+            [ ( in_ [  I, Ti, Yo, Ra, Ya,  A, We ], "木" )
+            , ( in_ [ Ro, Ri, Ta, Mu, Ma, Sa, Hi ], "火" )
+            , ( in_ [ Ha, Nu, Re,  U, Ke, Ki, Mo ], "土" )
+            , ( in_ [ Ni, Ru, So, Wi, Hu, Yu, Se ], "金" )
+            , ( in_ [ Ho, Wo, Tu, No, Ko, Me, Su ], "水" )
+            , ( in_ [ He, Wa, Ne,  O,  E, Mi,  N ], "人" )
+            ] "身"
+
 
 
 charToImg : Int -> ShinobiChar -> ( String, Html Msg )
 charToImg i char =
     let
         id =
-            charToImgUrlUniqueId char
+            toRomaji char
         li =
             Html.li []
                 [ Html.img
@@ -115,8 +196,8 @@ shinobiImgUrl uniqId =
     "/shinobi_chars/" ++ uniqId ++ ".svg"
 
 
-charToImgUrlUniqueId : ShinobiChar -> String
-charToImgUrlUniqueId char =
+toRomaji : ShinobiChar -> String
+toRomaji char =
     case char of
         I ->
             "i"
@@ -274,6 +355,9 @@ update msg model =
 
         SwitchMode newMode ->
             { model | mode = newMode }
+
+        SwitchOutputMode newOutputMode ->
+            { model | outputMode = newOutputMode }
 
         Convert ->
             let
